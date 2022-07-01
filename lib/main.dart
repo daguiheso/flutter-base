@@ -86,6 +86,11 @@ class AddBookButtonState extends State<AddBookButton> {
 
   @override
   Widget build(BuildContext context) {
+    var userData = context.dependOnInheritedWidgetOfExactType<UserData>()!;
+
+    // widget es para obtener la data del widget asociado a este state
+    var isSaved = userData.booksIds.contains(widget.bookId);
+
     var button = isSaved ? ElevatedButton(
       onPressed: manageBookInLibrary,
       style: ElevatedButton.styleFrom(primary: Colors.red[200]),
@@ -103,9 +108,8 @@ class AddBookButtonState extends State<AddBookButton> {
   }
 
   void manageBookInLibrary() {
-    setState(() {
-      isSaved = !isSaved;
-    });
+   // TODO: LLamar al backend y actualizar bbdd del usuario  (metodo async)
+   // TODO:Actualizar la data del Inherited Widget
   }
 
 }
