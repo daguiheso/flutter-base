@@ -8,6 +8,10 @@ class UserData extends InheritedWidget {
   final List<String> booksIds;
 
   const UserData({Key? key, required this.booksIds, required Widget child}) : super(key: key, child: child);
+
+  static UserData of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<UserData>()!;
+  }
   @override
   bool updateShouldNotify(covariant InheritedWidget oldWidget) {
     // TODO: debo notificar a mis hijos para que se actualizen?
@@ -29,13 +33,15 @@ class Booksy extends StatelessWidget {
       ),
       body: UserData(
         booksIds: booksIds,
-        child: BookScreen()
+        child: const BookScreen()
       )
     );
   }
 }
 
 class BookScreen extends StatelessWidget {
+  const BookScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -82,11 +88,9 @@ class AddBookButton extends StatefulWidget {
 }
 
 class AddBookButtonState extends State<AddBookButton> {
-  bool isSaved = false;
-
   @override
   Widget build(BuildContext context) {
-    var userData = context.dependOnInheritedWidgetOfExactType<UserData>()!;
+    var userData = UserData.of(context);
 
     // widget es para obtener la data del widget asociado a este state
     var isSaved = userData.booksIds.contains(widget.bookId);
