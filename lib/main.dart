@@ -1,84 +1,154 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 
 void main() {
-  var texto = "";
-  texto = "Hello World";
-  stdout.write('Buenas buenas');
-  runApp(const MyApp());
+  runApp(const MaterialApp(home: Booksy(), title: 'Boosky'));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class UserData extends InheritedWidget {
+  final List<String> booksIds;
 
-  // This widget is the root of your application.
+  const UserData({Key? key, required this.booksIds, required Widget child}) : super(key: key, child: child);
+  @override
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) {
+    // TODO: debo notificar a mis hijos para que se actualizen?
+    return true;
+  }
+
+}
+
+class Booksy extends StatelessWidget {
+  const Booksy({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.deepOrange,
+
+    var booksIds = ['douglas-hitch'];
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Boosky'),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Pages'),
+      body: UserData(
+        booksIds: booksIds,
+        child: BookScreen()
+      )
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
+class BookScreen extends StatelessWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 40),
+      color: Colors.white,
+      child: SafeArea(child: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 40.0, bottom: 30.0),
+                decoration: const BoxDecoration(
+                  boxShadow: [BoxShadow(blurRadius: 8)]
+                ),
+                child: const Image(
+                  image: AssetImage('images/cover.JPG'),
+                  width: 260,
+                )
+              ),
+              const BookDescription(
+                title: 'The Hitchhiker´s Guide to the Galaxy',
+                author: 'Douglas Adams',
+                description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'),
+              const Padding(padding: EdgeInsets.only(top: 10, bottom: 40)),
+              const AddBookButton(bookId: 'douglas-hitch',),
+            ],
+          )
+        )
+      ))
+    );
+  }
+
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class AddBookButton extends StatefulWidget {
+  final String bookId;
+  const AddBookButton({Key? key, required this.bookId}) : super(key: key);
 
-  void _incrementCounter() {
+  @override
+  State<StatefulWidget> createState() {
+   return AddBookButtonState();
+  }
+
+}
+
+class AddBookButtonState extends State<AddBookButton> {
+  bool isSaved = false;
+
+  @override
+  Widget build(BuildContext context) {
+    var button = isSaved ? ElevatedButton(
+      onPressed: manageBookInLibrary,
+      style: ElevatedButton.styleFrom(primary: Colors.red[200]),
+      child: const Text('Remove'),
+    ) : ElevatedButton(
+      onPressed: manageBookInLibrary,
+      style: ElevatedButton.styleFrom(primary: Colors.green[400]),
+      child: const Text('Add'),
+    );
+
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child:  button
+    );
+  }
+
+  void manageBookInLibrary() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      isSaved = !isSaved;
     });
   }
 
+}
+
+class BookDescription extends StatelessWidget {
+  final String title;
+  final String author;
+  final String description;
+  const BookDescription({Key? key, required this.title, required this.author, this.description = 'pepe' }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return const Center(
-      child: Text(
-        'Hola a Todos respondan!!1',
-        textDirection: TextDirection.ltr,
-        style: TextStyle(fontSize: 32),
-      ),
+    return Column(
+      children: [
+      Text(
+          title,
+          textDirection: TextDirection.ltr,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.black87,
+            fontSize: 30
+          )
+        ),
+        const Padding(padding: EdgeInsets.only(top: 30)),
+        Text(
+          author,
+          textDirection: TextDirection.ltr,
+          style: const TextStyle(
+            color: Colors.black54,
+            fontSize: 25
+          )
+        ),
+        const Padding(padding: EdgeInsets.only(top: 10)),
+        Text(
+          description,
+          textDirection: TextDirection.ltr,
+          style: const TextStyle(
+            color: Colors.black54,
+            fontSize: 18,
+          )
+        ),
+      ],
     );
   }
+
 }
