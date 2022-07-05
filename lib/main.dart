@@ -13,11 +13,46 @@ class UserData extends InheritedWidget {
     return context.dependOnInheritedWidgetOfExactType<UserData>()!;
   }
   @override
-  bool updateShouldNotify(covariant InheritedWidget oldWidget) {
+  bool updateShouldNotify(covariant UserData oldWidget) {
     // TODO: debo notificar a mis hijos para que se actualizen?
-    return true;
+    return booksIds != oldWidget.booksIds;
   }
 
+}
+
+class UserDataContainerWidget extends StatefulWidget {
+  final Widget child;
+  const UserDataContainerWidget({Key? key, required this.child}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return UserDataContainerState();
+  }
+}
+
+class UserDataContainerState extends State<UserDataContainerWidget> {
+  List<String> localBooksId = [];
+
+  static UserDataContainerState of(BuildContext context) {
+    return context.findAncestorStateOfType<UserDataContainerState>()!;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return UserData(booksIds: List.from(localBooksId), child: widget.child);
+  }
+
+  void addToLibrary(String bookId) {
+    setState(() {
+      localBooksId.add(bookId);
+    });
+  }
+
+  void removeToLibrary(String bookId) {
+    setState(() {
+      localBooksId.remove(bookId);
+    });
+  }
 }
 
 class Booksy extends StatelessWidget {
@@ -25,15 +60,12 @@ class Booksy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    var booksIds = ['douglas-hitch'];
     return Scaffold(
       appBar: AppBar(
         title: const Text('Boosky'),
       ),
-      body: UserData(
-        booksIds: booksIds,
-        child: const BookScreen()
+      body: const UserDataContainerWidget(
+        child: BookScreen()
       )
     );
   }
@@ -76,31 +108,25 @@ class BookScreen extends StatelessWidget {
 
 }
 
-class AddBookButton extends StatefulWidget {
+class AddBookButton extends StatelessWidget {
   final String bookId;
   const AddBookButton({Key? key, required this.bookId}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() {
-   return AddBookButtonState();
-  }
-
-}
-
-class AddBookButtonState extends State<AddBookButton> {
-  @override
   Widget build(BuildContext context) {
     var userData = UserData.of(context);
-
-    // widget es para obtener la data del widget asociado a este state
-    var isSaved = userData.booksIds.contains(widget.bookId);
+    var isSaved = userData.booksIds.contains(bookId);
 
     var button = isSaved ? ElevatedButton(
-      onPressed: manageBookInLibrary,
+      onPressed: () {
+        return  removeBookInLibrary(context);
+      },
       style: ElevatedButton.styleFrom(primary: Colors.red[200]),
       child: const Text('Remove'),
     ) : ElevatedButton(
-      onPressed: manageBookInLibrary,
+      onPressed: () {
+        return addBookInLibrary(context);
+      },
       style: ElevatedButton.styleFrom(primary: Colors.green[400]),
       child: const Text('Add'),
     );
@@ -111,9 +137,18 @@ class AddBookButtonState extends State<AddBookButton> {
     );
   }
 
-  void manageBookInLibrary() {
-   // TODO: LLamar al backend y actualizar bbdd del usuario  (metodo async)
-   // TODO:Actualizar la data del Inherited Widget
+  void addBookInLibrary(BuildContext context) {
+   // Modificar el state del UserDataContainerWidget
+   // nos ayuda a buscar un state en todos los ancestros
+   var userDataContainerState = UserDataContainerState.of(context);
+   userDataContainerState.addToLibrary(bookId);
+  }
+
+  void removeBookInLibrary(BuildContext context) {
+   // Modificar el state del UserDataContainerWidget
+   // nos ayuda a buscar un state en todos los ancestros
+   var userDataContainerState = UserDataContainerState.of(context);
+   userDataContainerState.removeToLibrary(bookId);
   }
 
 }
