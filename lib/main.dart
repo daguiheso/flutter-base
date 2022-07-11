@@ -1,7 +1,7 @@
-import 'package:base/layouts.dart';
+import 'package:base/buttons.dart';
 import 'package:flutter/material.dart';
 // import './booksy.dart';
 
 void main() {
-  runApp(const Layout());
+  runApp(const ExampleButtons());
 }
